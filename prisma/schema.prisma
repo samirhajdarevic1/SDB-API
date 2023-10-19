@@ -10,12 +10,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Roles table for role-based access control
+model Role {
+  role_id   Int    @id @default(autoincrement())
+  role_name String
+  // ... other role-related attributes
+  users     User[]
+}
+
+// Organizations table for managing organizations and their owners
+model Organization {
+  organization_id   Int    @id @default(autoincrement())
+  organization_name String
+  // ... other organization-related attributes
+  user              User?
+  user_id           Int?
+}
+
+// Users table for managing user accounts
+model User {
+  user_id         Int           @id @default(autoincrement())
+  name            String
+  last_name       String
+  email           String        @unique
+  password        String // Store securely hashed passwords
+  role_id         Int // References Role table's role_id
+  organization_id Int?          @unique // References Organization table's organization_id
+  student_id      Int?          @unique
+  teacher_id      Int?          @unique
+  // Relationships
+  Role            Role          @relation(fields: [role_id], references: [role_id])
+  Organization    Organization? @relation(fields: [organization_id], references: [organization_id])
+  Teacher         Teacher?      @relation(fields: [teacher_id], references: [teacher_id])
+  Student         Student?      @relation(fields: [student_id], references: [student_id])
+}
+
+// Teachers table for storing teacher-specific information
 model Teacher {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  username    String
-  name        String
-  lastName    String
-  age         Int
+  teacher_id Int   @id @default(autoincrement())
+  experience Int
+  age        Int
+  user       User?
+  user_id    Int?
+}
+
+// Students table for storing student-specific information
+model Student {
+  student_id  Int    @id @default(autoincrement())
+  father_name String
+  mother_name String
+  // ... other student-related attributes
+
+  // Relationships
+  user    User?
+  user_id Int?
 }
